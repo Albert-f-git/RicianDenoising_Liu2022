@@ -1,6 +1,6 @@
 # Rician Noise Denoising (Liu, 2022)
 
-基于全变分（Total Variation）和严格凸变分模型的 Rician 噪声去噪算法复现项目。
+基于全变分（Total Variation）和球面分解的 Rician 噪声去噪算法复现项目。
 
 本项目是非官方的 Python 实现版本，原论文为：
 > **Variational Rician Noise Removal via Splitting on Spheres** > *Zhifang Liu, Huibin Chang, Yuping Duan* (SIAM J. IMAGING SCIENCES, 2022)
