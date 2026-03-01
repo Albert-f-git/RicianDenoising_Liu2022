@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from src.utils import load_brainweb_data, add_rician_noise, compute_metrics_foreground
 from src.solvers import RicianSolver
+import cv2
 
 def main():
     # --- 1. 参数设置 (参考论文实验) ---
@@ -13,6 +14,7 @@ def main():
 
     print("Step 1: 正在加载原始 BrainWeb 数据...")
     u_true = load_brainweb_data(file_path)
+    cv2.imwrite("my_u_true_image_cv2.png", u_true) # 保存原始图像以供检查
 
     print(f"Step 2: 正在模拟莱斯噪声 (sigma={sigma})...")
     f = add_rician_noise(u_true, sigma)
