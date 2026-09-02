@@ -2,21 +2,26 @@ import numpy as np
 from .operators import compute_adaptive_g, forward_gradient, backward_divergence
 
 class RicianSolver:
-    def __init__(self, alpha, beta, r=1.0, sigma=25, max_iter=500, tol=1e-4):
+    def __init__(self, alpha, beta, r=1.0, sigma=25, c=2.0, max_iter=500, tol=1e-4, rng=None):
         self.alpha = alpha # 正则化参数
         self.beta = beta # 数据保真项权重
         self.r = r # ADMM 惩罚参数
         self.sigma = sigma # 噪声标准差
+        self.c = c # 公式 (3.8) 的缩放参数，论文实验默认 c=2
         self.max_iter = max_iter # 最大迭代次数
         self.tol = tol # 收敛容忍度
+        self.rng = rng
     
     def solve(self, f):
         # 1. 初始化 
         # u^0 = g, n1^0 = 0, n2^0 ~ N(0, sigma)
-        g = compute_adaptive_g(f, self.sigma) 
+        g = compute_adaptive_g(f, self.sigma, self.c)
         u = g.copy()
         n1 = np.zeros_like(f)
-        n2 = np.random.normal(0, self.sigma, f.shape)
+        if self.rng is None:
+            n2 = np.random.normal(0, self.sigma, f.shape)
+        else:
+            n2 = self.rng.normal(0, self.sigma, f.shape)
         
         for k in range(self.max_iter):
             u_old = u.copy()
@@ -37,7 +42,7 @@ class RicianSolver:
             n1, n2 = self._update_n(u, v1, v2, n1, n2)
 
             # 检查收敛性 
-            rel_err = np.linalg.norm(u - u_old) / np.linalg.norm(u_old)
+            rel_err = np.linalg.norm(u - u_old) / max(np.linalg.norm(u_old), 1e-12)
             if rel_err < self.tol:
                 break
                 
@@ -56,9 +61,10 @@ class RicianSolver:
         v_norm = np.sqrt(v1_hat**2 + v2_hat**2)
         
         # 闭式解投影: v = f * (v_hat / |v_hat|)
-        # 加 1e-8 防止除零错误
-        v1 = f * (v1_hat / np.maximum(v_norm, 1e-8))
-        v2 = f * (v2_hat / np.maximum(v_norm, 1e-8))
+        # 零向量处投影并不唯一；选择 (f, 0) 以始终满足球面约束。
+        nonzero = v_norm > 1e-12
+        v1 = np.where(nonzero, f * v1_hat / np.maximum(v_norm, 1e-12), f)
+        v2 = np.where(nonzero, f * v2_hat / np.maximum(v_norm, 1e-12), 0.0)
     
         return v1, v2
 
@@ -68,7 +74,12 @@ class RicianSolver:
         """
         # 计算参数
         beta_hat = self.beta + self.r
-        u_hat = (self.beta * g + self.r * (v1 - n1)) / beta_hat
+        # Paper equation (4.12): u_hat=[beta*g+r*v1+(alpha-r)*n1]/(beta+r).
+        u_hat = (
+            self.beta * g
+            + self.r * v1
+            + (self.alpha - self.r) * n1
+        ) / beta_hat
         
         # 初始化
         p_x = np.zeros_like(u_hat)

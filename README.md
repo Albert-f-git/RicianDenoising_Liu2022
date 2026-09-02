@@ -7,7 +7,7 @@
 
 ## 📖 项目简介
 
-基于 ADMM 算法的磁共振成像（MRI）莱斯噪声（Rician Noise）去噪复现项目。本项目复现了论文：“A fast ADMM algorithm for Rician noise removal based on splitting on spheres” (Liu et al., 2022)。
+基于 ADMM 算法的磁共振成像（MRI）莱斯噪声（Rician Noise）去噪复现项目。本项目复现上述 SIAM Journal on Imaging Sciences 论文的 Algorithm 4.1。
 
 ### ✨ 核心亮点：
 1. **数学对齐**：针对 Rician 噪声的非凸性，实现了基于 Splitting on Spheres（球面分裂） 的 ADMM 求解器，避开了复杂的 Bessel 函数求导。
@@ -36,7 +36,7 @@ RicianDenoising_Liu2022/
 请确保您的环境中安装了 Python 3.7+。建议使用虚拟环境运行，执行以下命令安装所需核心依赖：
 
 ```bash
-pip install numpy scipy scikit-image matplotlib
+pip install numpy scipy scikit-image matplotlib opencv-python
 ```
 
 ## 🚀 快速开始
@@ -47,17 +47,17 @@ pip install numpy scipy scikit-image matplotlib
 python main.py
 ```
 
-代码会自动加载默认的测试图像（Brain），添加 $\sigma=25$ 的 Rician 噪声，运行去噪算法与偏差校正，最终在终端输出 PSNR (前景区域)与 SSIM 指标，并弹出对比效果图。
+代码会自动加载默认的测试图像（Brain），添加 $\sigma=25$ 的 Rician 噪声，使用论文参数 `alpha=0.01`、`beta=0.045`、`r=1`、`c=2` 运行 Algorithm 4.1，最多迭代500次并按相对误差提前停止。
 
 ## 📊 实验结果
 
 实验采用从Brainweb上获取的模拟MRI图像，在 $\sigma=25$ 的 Rician 噪声(固定seed=45)下，brain 图像的恢复效果如下：
 
 * **Noisy Image**: PSNR $\approx 20.28$ dB, SSIM $\approx 0.6641$
-* **Restored Image**: PSNR $\approx 26.93$ dB, SSIM $\approx 0.8887$
+* **Restored Image**: PSNR $\approx 26.76$ dB, SSIM $\approx 0.8766$
 
 ![实验结果对比图](./result.png)
 
 ## 📜 参考文献
 
-* Liu, J., Chen, D. Y., & Huang, J. Z. (2022). A fast ADMM algorithm for Rician noise removal based on splitting on spheres. Applied Mathematical Modelling, 104, 211-231. [DOI: 10.1016/j.apm.2021.11.025]
+* Liu, Z., Chang, H., & Duan, Y. (2022). Variational Rician Noise Removal via Splitting on Spheres. *SIAM Journal on Imaging Sciences*, 15(2), 524-549. [DOI: 10.1137/21M1432194]

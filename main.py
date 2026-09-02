@@ -20,7 +20,7 @@ def main():
     f = add_rician_noise(u_true, sigma)
 
     # --- 2. 初始化求解器 ---
-    solver = RicianSolver(alpha=alpha, beta=beta, r=r, sigma=sigma, max_iter=100)
+    solver = RicianSolver(alpha=alpha, beta=beta, r=r, sigma=sigma, c=2.0, max_iter=500)
 
     print("Step 3: 启动 Algorithm 4.1 (Simplified ADMM)...")
     u_denoised = solver.solve(f)
@@ -59,4 +59,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    

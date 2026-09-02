@@ -44,7 +44,7 @@ def backward_divergence(dx, dy):
 
     return div_val
 
-def compute_adaptive_g(f, sigma, c=1.5):
+def compute_adaptive_g(f, sigma, c=2.0):
     """
     计算公式(3.8)的函数g
 
